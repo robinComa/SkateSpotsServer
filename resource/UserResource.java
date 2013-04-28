@@ -3,6 +3,7 @@ package resource;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -14,8 +15,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import dao.SpotDao;
 import dao.UserDao;
 import domain.Board;
@@ -30,31 +33,34 @@ import exception.UnauthorizedException;
 @Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
 
-	User authUser;
-	UserDao dao;
-	SpotDao spotDao;
+	private User authUser;
+	private UserDao dao;
+	private SpotDao spotDao;
+	private String authorization;
 	
 	public UserResource(@HeaderParam(HttpHeaders.AUTHORIZATION) String authorization){
+		this.authorization = authorization;
 		this.dao = new UserDao();
 		this.spotDao = new SpotDao();
-		//TODO remove when create user!!!
-		this.authUser = dao.auth(authorization);
 	}
 	
 	@GET
 	public User loginUser(){
+		this.authUser = dao.auth(authorization);
 		return this.authUser;
 	}
 	
 	@GET
 	@Path("/{id}")
 	public User getUser(@PathParam("id") long id){
+		this.authUser = dao.auth(authorization);
 		return this.dao.read(id);
 	}
 	
 	@POST
 	@Path("/getByCoordinatesFrame")
 	public Collection<User> getSpotsByCoordinatesFrame(List<Coordinate> coordinates){
+		this.authUser = dao.auth(authorization);
 		if(coordinates.size() != 2){
 			throw new WebApplicationException(Response.Status.NOT_ACCEPTABLE);
 		}
@@ -63,11 +69,14 @@ public class UserResource {
 		
 	@POST
 	public User postUser(User user){
+		System.out.println(user.getName());
+		System.out.println(user.getClientId());
 		return this.dao.create(user);
 	}
 	
 	@PUT
 	public User putUser(User user){
+		this.authUser = dao.auth(authorization);
 		if(user.getId() == this.authUser.getId()){
 			return this.dao.update(user);
 		}else{
@@ -78,6 +87,7 @@ public class UserResource {
 	@DELETE
 	@Path("/{id}")
 	public void deleteUser(@PathParam("id") long id){
+		this.authUser = dao.auth(authorization);
 		if(id == this.authUser.getId()){
 			this.dao.delete(this.authUser);
 		}else{
@@ -88,30 +98,35 @@ public class UserResource {
 	@PUT
 	@Path("/updateBoardInfo")
 	public void updateBoardSize(Board board){
+		this.authUser = dao.auth(authorization);
 		this.dao.updateBoardNameInfo(this.authUser, board.getName(), board.getSize());
 	}
 	
 	@PUT
 	@Path("updateAvatar/{id}")
 	public void addPicture(@PathParam("id") long id, SpotPicture picture) throws IOException{
+		this.authUser = dao.auth(authorization);
 		this.dao.updateAvatar(this.authUser, picture.getSrc());
 	}
 	
 	@PUT
 	@Path("updateBoardPicture/{id}")
 	public void updateBoardPicture(@PathParam("id") long id, SpotPicture picture) throws IOException{
+		this.authUser = dao.auth(authorization);
 		this.dao.updateBoardPicture(this.authUser, picture.getSrc());
 	}
 	
 	@PUT
 	@Path("updateBoardLogo/{id}")
 	public void updateBoardLogo(@PathParam("id") long id, SpotPicture picture) throws IOException{
+		this.authUser = dao.auth(authorization);
 		this.dao.updateBoardLogo(this.authUser, picture.getSrc());
 	}
 	
 	@PUT
 	@Path("addCheckIn/{id}")
 	public CheckIn updateBoardLogo(@PathParam("id") long id){
+		this.authUser = dao.auth(authorization);
 		return this.dao.addCheckIn(this.authUser, this.spotDao.read(id));
 	}
 	

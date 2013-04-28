@@ -14,6 +14,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -33,13 +34,16 @@ public class User {
 	private String avatar;
 	
 	@Column(name="client_id", nullable = false, unique = true, length=255)
+	@XmlElement(name = "clientId")
 	private String clientId;
 	
 	@Column(name="email", nullable = false, unique = true, length=255)
+	@XmlTransient
 	private String email;
 	
-	@Column(name="is_google_client")
-	private boolean isGoogleClient;
+	@Column(name="social")
+	@XmlTransient
+	private String social;
 	
 	private Coordinate coordinates;
 	
@@ -91,6 +95,14 @@ public class User {
 
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
+	}
+
+	public String getSocial() {
+		return social;
+	}
+
+	public void setSocial(String social) {
+		this.social = social;
 	}
 
 	@Embedded
